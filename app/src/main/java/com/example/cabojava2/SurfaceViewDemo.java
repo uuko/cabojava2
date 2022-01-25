@@ -19,7 +19,7 @@ public class SurfaceViewDemo extends SurfaceView implements SurfaceHolder.Callba
     private Canvas mCanvas;
     private Paint paint;
     private Handler mHandler;
-    private int xPos = 0;
+    private int xPos = 500;
     private float mapYpos = 0;
     private float screenWidth, screenHeight;
     private float xLftBorder=0;
@@ -70,8 +70,9 @@ public class SurfaceViewDemo extends SurfaceView implements SurfaceHolder.Callba
 
     boolean isWide=false;
     boolean isJump=false;
+    int a=0;
     private void drawCabo(Canvas mCanvas) {
-
+        a++;
         System.out.println("============draw======== y:" + mapYpos + " ==x: " + xPos);
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setColor(Color.RED);
@@ -85,7 +86,13 @@ public class SurfaceViewDemo extends SurfaceView implements SurfaceHolder.Callba
 
         // LIST
 
-        
+//         C=1;
+//         LIST X,Y
+        //  X LEFT 500 RIGHT 700 Y 1080
+        // LIST.GET(a).GETlEFT();
+
+
+
         mCanvas.drawBitmap(mapBit, 0, mapYpos = mapYpos + 25, paint);
         if (xPos+leftBitmap.getWidth() < xRightBorder && !isWide) {
             if (isJump){
