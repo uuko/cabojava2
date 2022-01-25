@@ -20,8 +20,10 @@ public class SurfaceViewDemo extends SurfaceView implements SurfaceHolder.Callba
     private Paint paint;
     private Handler mHandler;
     private int xPos = 0;
-    private float mapYpos;
-    private float screenWidth,screenHeight;
+    private float mapYpos = 0;
+    private float screenWidth, screenHeight;
+    private float xLftBorder=0;
+    private float xRightBorder=0;
     public SurfaceViewDemo(Context context) {
         this(context, null, 0);
     }
@@ -47,11 +49,11 @@ public class SurfaceViewDemo extends SurfaceView implements SurfaceHolder.Callba
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
 
-        screenWidth=getWidth();
-        screenHeight=getHeight();
-        System.out.println("=========surfaceCreated======== width: "+screenWidth +" height: "+screenHeight);
-        mapYpos=screenHeight;
-
+        screenWidth = getWidth();
+        screenHeight = getHeight();
+        System.out.println("=========surfaceCreated======== width: " + screenWidth + " height: " + screenHeight);
+//        mapYpos = -1 * screenHeight;
+        xRightBorder=screenWidth;
         mHandler = new Handler();
         mHandler.postDelayed(new Runnable() {
             @Override
@@ -66,20 +68,50 @@ public class SurfaceViewDemo extends SurfaceView implements SurfaceHolder.Callba
 
     }
 
+    boolean isWide=false;
+    boolean isJump=false;
     private void drawCabo(Canvas mCanvas) {
 
-        System.out.println("============draw======== y:"+mapYpos +" ==x: "+xPos);
-            paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            paint.setColor(Color.RED);
-            paint.setStrokeWidth(5);
-            paint.setStyle(Paint.Style.STROKE);
+        System.out.println("============draw======== y:" + mapYpos + " ==x: " + xPos);
+        paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(Color.RED);
+        paint.setStrokeWidth(5);
+        paint.setStyle(Paint.Style.STROKE);
         mCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-        Bitmap mapBit=BitmapFactory.decodeResource(getResources(),R.drawable.img111_1858);
-        mapBit=getResizedBitmap(mapBit,(int) screenWidth,(int)screenHeight);
+        Bitmap mapBit = BitmapFactory.decodeResource(getResources(), R.drawable.img111_1858);
+        mapBit = getResizedBitmap(mapBit, (int) screenWidth, (int) screenHeight);
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.capoo_2);
+        Bitmap leftBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.capoo_3);
 
-        mCanvas.drawBitmap(mapBit, 0,mapYpos=mapYpos-100, paint);
-        mCanvas.drawBitmap(bitmap, xPos = xPos + 5, 550, paint);
+        // LIST
+
+        
+        mCanvas.drawBitmap(mapBit, 0, mapYpos = mapYpos + 25, paint);
+        if (xPos+leftBitmap.getWidth() < xRightBorder && !isWide) {
+            if (isJump){
+                isJump=false;
+                mCanvas.drawBitmap(leftBitmap, xPos = xPos + 50, screenHeight - leftBitmap.getHeight()+5, paint);
+            }
+            else {
+                isJump=true;
+                mCanvas.drawBitmap(leftBitmap, xPos = xPos + 50, screenHeight - leftBitmap.getHeight()-5, paint);
+            }
+
+        } else {
+            if (isJump){
+                isJump=false;
+                mCanvas.drawBitmap(bitmap, xPos = xPos -
+                        50, screenHeight - bitmap.getHeight()+5, paint);
+            }
+            else {
+                isJump=true;
+                mCanvas.drawBitmap(bitmap, xPos = xPos -
+                        50, screenHeight - bitmap.getHeight()-5, paint);
+            }
+
+        }
+        if (xPos+bitmap.getWidth()>=xRightBorder)isWide=true;
+        if (xPos<=xLftBorder)isWide=false;
 
 
     }
@@ -94,6 +126,7 @@ public class SurfaceViewDemo extends SurfaceView implements SurfaceHolder.Callba
         // if(this.mBgX<=-this.screenWidht/2){ this.state=State.RIGHT; } //如果X坐标大于0，向左移动
         // if(this.mBgX>=0){ this.state=State.LEFT; }
     }
+
     public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
         int width = bm.getWidth();
         int height = bm.getHeight();
@@ -110,6 +143,7 @@ public class SurfaceViewDemo extends SurfaceView implements SurfaceHolder.Callba
         bm.recycle();
         return resizedBitmap;
     }
+
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         System.out.println("=========surfaceChanged========");
