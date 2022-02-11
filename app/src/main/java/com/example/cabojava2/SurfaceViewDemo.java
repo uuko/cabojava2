@@ -10,8 +10,12 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class SurfaceViewDemo extends SurfaceView implements SurfaceHolder.Callback {
@@ -46,14 +50,23 @@ public class SurfaceViewDemo extends SurfaceView implements SurfaceHolder.Callba
 
     }
 
+    double[] border = new double[]{0.3, 0.54, 0.45, 0.7, 0.3, 0.58, 0.28, 0.68, -1};
+    double[] list_x = new double[]{0.01, 0.01, 0.005, 0.01, 0.02, 0.01, 0.01, 0.01};
+    double[] list_y = new double[]{0.006, 0.006, 0.003, 0.006, 0.012, 0.006, 0.006, 0.006};
+    int flag = 0;
+    boolean isWide = false;
+    boolean isJump = false;
+    int a = 0;
+
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
 
         screenWidth = getWidth();
         screenHeight = getHeight();
+        xPos = (int) (screenWidth * 0.535);
         System.out.println("=========surfaceCreated======== width: " + screenWidth + " height: " + screenHeight);
 //        mapYpos = -1 * screenHeight;
-        xRightBorder=screenWidth;
+        xRightBorder = screenWidth;
         mHandler = new Handler();
         mHandler.postDelayed(new Runnable() {
             @Override
@@ -62,18 +75,24 @@ public class SurfaceViewDemo extends SurfaceView implements SurfaceHolder.Callba
 
                 drawCabo(mCanvas);
                 mSurfaceHolder.unlockCanvasAndPost(mCanvas);
-                mHandler.postDelayed(this, 500);
+                mHandler.postDelayed(this, 20);
             }
-        }, 500);
+        }, 20);
 
     }
 
-    boolean isWide=false;
-    boolean isJump=false;
-    int a=0;
     private void drawCabo(Canvas mCanvas) {
-        a++;
-        System.out.println("============draw======== y:" + mapYpos + " ==x: " + xPos);
+        if (a % 2 == 0) {
+            xLftBorder = (float) (screenWidth * border[a]);
+            xRightBorder = screenWidth;
+        } else {
+            xLftBorder = 0;
+            xRightBorder = (float) (screenWidth * border[a]);
+        }
+
+        Log.d("taggg", "borderL:" + xLftBorder + ",borderR:" + xRightBorder);
+        System.out.println("============dr" +
+                "aw======== y:" + mapYpos + " ==x: " + xPos);
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setColor(Color.RED);
         paint.setStrokeWidth(5);
@@ -83,7 +102,21 @@ public class SurfaceViewDemo extends SurfaceView implements SurfaceHolder.Callba
         mapBit = getResizedBitmap(mapBit, (int) screenWidth, (int) screenHeight);
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.capoo_2);
         Bitmap leftBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.capoo_3);
-
+        if (border[a] != -1) {
+            if (isWide && xPos > xLftBorder && flag == 0) {
+                a += 1;
+                flag = 1;
+                Log.d("taggg", "leftt");
+            } else if (!isWide && (xPos + bitmap.getWidth()) >= xRightBorder && flag == 0) {
+                a += 1;
+                flag = 1;
+                Log.d("taggg", "rightt");
+            }
+        } else {
+            Log.d("taggg", "finish");
+            mCanvas.drawBitmap(bitmap, xPos = (int) (screenWidth * border[a - 1]),
+                    screenHeight - bitmap.getHeight(), paint);
+        }
         // LIST
 
 //         C=1;
@@ -91,34 +124,43 @@ public class SurfaceViewDemo extends SurfaceView implements SurfaceHolder.Callba
         //  X LEFT 500 RIGHT 700 Y 1080
         // LIST.GET(a).GETlEFT();
 
-
-
-        mCanvas.drawBitmap(mapBit, 0, mapYpos = mapYpos + 25, paint);
-        if (xPos+leftBitmap.getWidth() < xRightBorder && !isWide) {
-            if (isJump){
-                isJump=false;
-                mCanvas.drawBitmap(leftBitmap, xPos = xPos + 50, screenHeight - leftBitmap.getHeight()+5, paint);
-            }
-            else {
-                isJump=true;
-                mCanvas.drawBitmap(leftBitmap, xPos = xPos + 50, screenHeight - leftBitmap.getHeight()-5, paint);
-            }
-
-        } else {
-            if (isJump){
-                isJump=false;
-                mCanvas.drawBitmap(bitmap, xPos = xPos -
-                        50, screenHeight - bitmap.getHeight()+5, paint);
-            }
-            else {
-                isJump=true;
-                mCanvas.drawBitmap(bitmap, xPos = xPos -
-                        50, screenHeight - bitmap.getHeight()-5, paint);
+        //圖片往下
+        mCanvas.drawBitmap(mapBit, 0, mapYpos =
+                (float) (mapYpos + screenHeight * list_y[a]), paint);
+        //咖波左(移動+跳)
+        if (xPos + leftBitmap.getWidth() < xRightBorder && isWide) {
+            if (isJump) {
+                isJump = false;
+                mCanvas.drawBitmap(leftBitmap, xPos = (int) (xPos + screenWidth * list_x[a]),
+                        screenHeight - leftBitmap.getHeight() + 5, paint);
+            } else {
+                isJump = true;
+                mCanvas.drawBitmap(leftBitmap, xPos = (int) (xPos + screenWidth * list_x[a]),
+                        screenHeight - leftBitmap.getHeight() - 5, paint);
             }
 
         }
-        if (xPos+bitmap.getWidth()>=xRightBorder)isWide=true;
-        if (xPos<=xLftBorder)isWide=false;
+        //咖波右(移動+跳)
+        else {
+            if (isJump) {
+                isJump = false;
+                mCanvas.drawBitmap(bitmap, xPos = (int) (xPos - screenWidth * list_x[a])
+                        , screenHeight - bitmap.getHeight() + 5, paint);
+            } else {
+                isJump = true;
+                mCanvas.drawBitmap(bitmap, xPos = (int) (xPos - screenWidth * list_x[a])
+                        , screenHeight - bitmap.getHeight() - 5, paint);
+            }
+
+        }
+        if (xPos + bitmap.getWidth() >= xRightBorder) {
+            isWide = false;//到右邊界轉左
+            flag = 0;
+        }
+        if (xPos <= xLftBorder) {
+            isWide = true;//到左邊界轉右
+            flag = 0;
+        }
 
 
     }
